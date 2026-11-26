@@ -38,6 +38,9 @@
         .mensaje-guardado.is-error { color: #be123c; }
         .boton-borrar-guardado { display: none; }
         .boton-borrar-guardado.is-visible { display: inline-flex; }
+        .theme-toggle { display: inline-flex; align-items: center; gap: .5rem; }
+        .theme-status { display: none; color: #be123c; }
+        .theme-status.is-visible { display: block; }
 
         /* En móvil el menú aparece por estado; a partir de sm queda visible en la cabecera. */
         .menu-toggle { display: grid; }
@@ -87,3 +90,81 @@
                 transition-duration: .01ms !important;
             }
         }
+
+        /* Las utilidades de Tailwind conservan el tema claro por defecto; estas reglas adaptan sus superficies al modo oscuro. */
+        body.tema-oscuro {
+            color-scheme: dark;
+            background:
+                radial-gradient(ellipse at 12% 9%, rgba(109, 40, 217, .14), transparent 34rem),
+                radial-gradient(ellipse at 90% 60%, rgba(13, 148, 136, .12), transparent 31rem),
+                #111827;
+            color: #e2e8f0;
+        }
+
+        body.tema-oscuro .bg-white,
+        body.tema-oscuro .bg-white\/60,
+        body.tema-oscuro .bg-white\/70,
+        body.tema-oscuro .bg-white\/75,
+        body.tema-oscuro .bg-white\/80 {
+            background-color: #1f2937;
+        }
+        body.tema-oscuro .bg-slate-50,
+        body.tema-oscuro .bg-slate-50\/70 {
+            background-color: #111827;
+        }
+        body.tema-oscuro .bg-violet-50 { background-color: #2e2452; }
+        body.tema-oscuro .bg-teal-50 { background-color: #123b3b; }
+        body.tema-oscuro .border-white,
+        body.tema-oscuro .border-white\/80,
+        body.tema-oscuro .border-slate-200 {
+            border-color: #374151;
+        }
+        body.tema-oscuro .border-violet-100 { border-color: #4c3b78; }
+
+        body.tema-oscuro .text-slate-900,
+        body.tema-oscuro .text-slate-800,
+        body.tema-oscuro .text-slate-700 {
+            color: #f1f5f9;
+        }
+        body.tema-oscuro .text-slate-600,
+        body.tema-oscuro .text-slate-500 {
+            color: #cbd5e1;
+        }
+        body.tema-oscuro .text-slate-400 { color: #94a3b8; }
+        body.tema-oscuro .text-violet-700,
+        body.tema-oscuro .text-violet-600 { color: #c4b5fd; }
+        body.tema-oscuro .text-teal-600 { color: #5eead4; }
+        body.tema-oscuro .text-sky-800,
+        body.tema-oscuro .text-sky-700 { color: #bae6fd; }
+        body.tema-oscuro .text-emerald-800,
+        body.tema-oscuro .text-emerald-700 { color: #a7f3d0; }
+        body.tema-oscuro .text-amber-800,
+        body.tema-oscuro .text-amber-700 { color: #fde68a; }
+        body.tema-oscuro .text-rose-800,
+        body.tema-oscuro .text-rose-700 { color: #fecdd3; }
+
+        body.tema-oscuro .rango--bajo { background-color: #172f42; color: #bae6fd; }
+        body.tema-oscuro .rango--saludable { background-color: #12352f; color: #a7f3d0; }
+        body.tema-oscuro .rango--sobrepeso { background-color: #3a2e16; color: #fde68a; }
+        body.tema-oscuro .rango--obesidad { background-color: #3d2029; color: #fecdd3; }
+        body.tema-oscuro .rango-vacio { color: #cbd5e1; }
+
+        body.tema-oscuro .resultado-card.estado--inicial { background-color: #1f2937; }
+        body.tema-oscuro .resultado-card.estado--bajo { background-color: #172f42; }
+        body.tema-oscuro .resultado-card.estado--saludable { background-color: #12352f; }
+        body.tema-oscuro .resultado-card.estado--sobrepeso { background-color: #3a2e16; }
+        body.tema-oscuro .resultado-card.estado--obesidad { background-color: #3d2029; }
+        body.tema-oscuro .resultado__categoria { background-color: #111827; color: #e2e8f0; }
+        body.tema-oscuro .estado--bajo .resultado__categoria { background-color: #23465d; color: #bae6fd; }
+        body.tema-oscuro .estado--saludable .resultado__categoria { background-color: #1b5144; color: #a7f3d0; }
+        body.tema-oscuro .estado--sobrepeso .resultado__categoria { background-color: #5b451e; color: #fde68a; }
+        body.tema-oscuro .estado--obesidad .resultado__categoria { background-color: #5a2c3a; color: #fecdd3; }
+
+        body.tema-oscuro .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+        body.tema-oscuro .placeholder\:text-slate-400::placeholder { color: #94a3b8; }
+        body.tema-oscuro .shadow-sm,
+        body.tema-oscuro .shadow-lg { --tw-shadow-color: rgb(0 0 0 / 0.2); }
+        body.tema-oscuro .hover\:text-violet-900:hover { color: #ddd6fe; }
+        body.tema-oscuro .theme-toggle { border-color: #4b5563; background-color: #1f2937; color: #e2e8f0; }
+        body.tema-oscuro .theme-toggle:hover { border-color: #7c6bb1; color: #ddd6fe; }
+        body.tema-oscuro .input-shell:focus-within { border-color: #a78bfa; }

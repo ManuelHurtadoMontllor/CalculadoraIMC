@@ -18,6 +18,8 @@ const categoriaIMC = document.getElementById("bmi-category");
 const marcador = document.getElementById("gauge-marker");
 const menuToggle = document.getElementById("menu-toggle");
 const navegacion = document.getElementById("primary-nav");
+const themeToggle = document.getElementById("theme-toggle");
+const themeStatus = document.getElementById("theme-status");
 const recordarMedidas = document.getElementById("remember-measures");
 const borrarMedidasButton = document.getElementById("clear-saved-measures");
 const estadoMedidasGuardadas = document.getElementById("saved-measures-status");
@@ -25,7 +27,45 @@ const buscadorRangos = document.getElementById("range-search");
 const estadoBusquedaRangos = document.getElementById("range-search-status");
 const CLAVE_PESO_GUARDADO = "equilibra.peso";
 const CLAVE_ALTURA_GUARDADA = "equilibra.altura";
+const CLAVE_TEMA_GUARDADO = "equilibra.tema";
 let formularioEnviado = false;
+
+function aplicarTema(temaOscuro) {
+    document.body.classList.toggle("tema-oscuro", temaOscuro);
+    themeToggle.setAttribute("aria-pressed", String(temaOscuro));
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", temaOscuro ? "#111827" : "#f6f7fb");
+}
+
+function mostrarErrorPreferenciaTema(error, accion) {
+    if (!(error instanceof DOMException)) {
+        throw error;
+    }
+
+    themeStatus.textContent = `No se pudo ${accion} la preferencia del tema en este navegador.`;
+    themeStatus.classList.add("is-visible");
+}
+
+if (themeToggle && themeStatus) {
+    try {
+        aplicarTema(localStorage.getItem(CLAVE_TEMA_GUARDADO) === "oscuro");
+    } catch (error) {
+        aplicarTema(false);
+        mostrarErrorPreferenciaTema(error, "leer");
+    }
+
+    themeToggle.addEventListener("click", () => {
+        const temaOscuro = themeToggle.getAttribute("aria-pressed") !== "true";
+        aplicarTema(temaOscuro);
+
+        try {
+            localStorage.setItem(CLAVE_TEMA_GUARDADO, temaOscuro ? "oscuro" : "claro");
+            themeStatus.textContent = "";
+            themeStatus.classList.remove("is-visible");
+        } catch (error) {
+            mostrarErrorPreferenciaTema(error, "guardar");
+        }
+    });
+}
 
 function calcularIMC(peso, alturaEnCentimetros) {
     const alturaEnMetros = alturaEnCentimetros / 100;

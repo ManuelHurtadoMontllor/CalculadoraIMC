@@ -72,7 +72,7 @@
                     esta página reúne la memoria de diseño. El marcado es HTML semántico y mobile first. Tailwind se usa para la composición visual y <code>estilos/styles.css</code> para fondos, animaciones y estados propios.
                 </p>
                 <p class="mt-3 text-sm leading-7 text-slate-500">
-                    La lógica está en <code>js/main.js</code>, cargada con <code>defer</code> y sin bibliotecas de JavaScript. Un array de objetos contiene los rangos del IMC y genera sus tarjetas con <code>createElement</code>. El tema elegido se guarda en <code>localStorage</code>; el guardado de peso y altura es independiente, opcional y puede borrarse desde la calculadora.
+                    La lógica está en <code>js/main.js</code>, cargada con <code>defer</code> y sin bibliotecas de JavaScript. Un array de objetos contiene los rangos del IMC y genera sus tarjetas con <code>createElement</code>. El tema elegido se guarda en <code>localStorage</code>. Si la persona activa «Recordar mis medidas», cada cálculo válido se añade a un historial local que alimenta el gráfico; el historial puede borrarse por separado.
                 </p>
             </section>
 
@@ -88,30 +88,35 @@
 │ Presentación         │
 │ Título y beneficios  │
 ├─────────────────────┤
+│ Calculadora          │
 │ Peso y altura        │
 │ Errores dinámicos    │
 │ [Recordar medidas]   │
 │ [Calcular IMC]       │
 │ Resultado dinámico  │
 ├─────────────────────┤
+│ Gráfico del historial│
+├─────────────────────┤
 │ Información / enlaces│
 └─────────────────────┘</pre>
                     </article>
                     <article>
                         <h3 class="font-semibold text-slate-700">Escritorio · dos columnas</h3>
-                        <pre class="mt-3 overflow-x-auto rounded-2xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">┌─────────────────────────────────────┐
-│ Marca   Navegación   Ir a calcular  │
-├──────────────────┬──────────────────┤
-│ Presentación     │ Calculadora      │
-│ Título           │ Peso / altura    │
-│ Beneficios       │ Botón y resultado│
-├──────────────────┴──────────────────┤
-│ Información del IMC                 │
-└─────────────────────────────────────┘</pre>
+                        <pre class="mt-3 overflow-x-auto rounded-2xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">┌──────────────────────────────────────────┐
+│ Marca   Navegación   Calcular   Tema     │
+├──────────────────────────────────────────┤
+│ Presentación: «Conócete un poco mejor»    │
+├───────────────────┬──────────────────────┤
+│ Calculadora       │ Evolución del IMC    │
+│ Peso / altura     │ Gráfico historial    │
+│ Botón / resultado│                       │
+├───────────────────┴──────────────────────┤
+│ Información del IMC                      │
+└──────────────────────────────────────────┘</pre>
                     </article>
                 </div>
                 <p class="mt-4 text-sm leading-6 text-slate-500">
-                Las zonas dinámicas son el menú móvil, el tema, los errores de campo, el IMC y su categoría, el marcador, el guardado local y las tarjetas filtrables de rangos.
+                Las zonas dinámicas son el menú móvil, el tema, los errores de campo, el IMC y su categoría, el marcador, el historial y gráfico local, y las tarjetas filtrables de rangos.
                 </p>
             </section>
 
@@ -158,7 +163,12 @@
                             <tr>
                                 <th scope="row" class="px-6 py-4 font-semibold text-slate-700">Medidas guardadas</th>
                                 <td class="px-6 py-4">Casilla, input, submit o botón borrar</td>
-                                <td class="px-6 py-4">Con permiso, guarda y recupera peso y altura localmente; permite eliminarlos.</td>
+                                <td class="px-6 py-4">Con permiso, guarda y recupera peso y altura; las mediciones del gráfico se pueden borrar por separado.</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="px-6 py-4 font-semibold text-slate-700">Gráfico de evolución</th>
+                                <td class="px-6 py-4">Submit válido con «Recordar mis medidas» activado</td>
+                                <td class="px-6 py-4">Añade fecha e IMC al historial local y actualiza el gráfico SVG; el historial se borra con su botón.</td>
                             </tr>
                             <tr>
                                 <th scope="row" class="px-6 py-4 font-semibold text-slate-700">Tema claro/oscuro</th>

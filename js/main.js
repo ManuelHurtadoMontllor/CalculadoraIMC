@@ -23,11 +23,17 @@ const themeStatus = document.getElementById("theme-status");
 const recordarMedidas = document.getElementById("remember-measures");
 const borrarMedidasButton = document.getElementById("clear-saved-measures");
 const estadoMedidasGuardadas = document.getElementById("saved-measures-status");
+const graficoHistorial = document.getElementById("history-chart");
+const historialVacio = document.getElementById("history-empty");
+const resumenHistorial = document.getElementById("history-chart-summary");
+const estadoHistorial = document.getElementById("history-status");
+const borrarHistorialButton = document.getElementById("clear-history");
 const buscadorRangos = document.getElementById("range-search");
 const estadoBusquedaRangos = document.getElementById("range-search-status");
 const CLAVE_PESO_GUARDADO = "equilibra.peso";
 const CLAVE_ALTURA_GUARDADA = "equilibra.altura";
 const CLAVE_TEMA_GUARDADO = "equilibra.tema";
+const CLAVE_HISTORIAL_IMC = "equilibra.historial-imc";
 let formularioEnviado = false;
 
 function aplicarTema(temaOscuro) {
@@ -251,9 +257,227 @@ function borrarMedidasGuardadas() {
         localStorage.removeItem(CLAVE_ALTURA_GUARDADA);
         recordarMedidas.checked = false;
         borrarMedidasButton.classList.remove("is-visible");
-        mostrarEstadoGuardado("Se han borrado las medidas guardadas en este navegador.");
+        mostrarEstadoGuardado("Se han borrado las medidas guardadas; el historial se conserva hasta que lo borres.");
     } catch (error) {
         manejarErrorDeAlmacenamiento(error, "borrar");
+    }
+}
+
+function mostrarEstadoHistorial(texto, esError = false) {
+    estadoHistorial.textContent = texto;
+    estadoHistorial.classList.toggle("is-error", esError);
+    estadoHistorial.classList.add("is-visible");
+}
+
+function esMedicionValida(medicion) {
+    return medicion !== null &&
+        Number.isFinite(medicion.peso) && medicion.peso >= 2 && medicion.peso <= 500 &&
+        Number.isFinite(medicion.altura) && medicion.altura >= 50 && medicion.altura <= 300 &&
+        (medicion.fecha === null || (typeof medicion.fecha === "string" && Number.isFinite(Date.parse(medicion.fecha))));
+}
+
+function leerHistorialMediciones() {
+    try {
+        const historialGuardado = localStorage.getItem(CLAVE_HISTORIAL_IMC);
+
+        if (historialGuardado === null) {
+            return { mediciones: [], existe: false };
+        }
+
+        const mediciones = JSON.parse(historialGuardado);
+        if (!Array.isArray(mediciones)) {
+            throw new TypeError("El historial guardado no es una lista.");
+        }
+
+        const medicionesValidas = mediciones.filter(esMedicionValida);
+        if (medicionesValidas.length !== mediciones.length) {
+            mostrarEstadoHistorial("Algunas mediciones guardadas no son válidas y se han omitido.", true);
+        }
+
+        return { mediciones: medicionesValidas, existe: true };
+    } catch (error) {
+        if (!(error instanceof DOMException) && !(error instanceof SyntaxError) && !(error instanceof TypeError)) {
+            throw error;
+        }
+
+        mostrarEstadoHistorial("No se pudo leer el historial guardado. Puedes borrarlo y empezar de nuevo.", true);
+        return null;
+    }
+}
+
+function guardarHistorialMediciones(mediciones) {
+    try {
+        localStorage.setItem(CLAVE_HISTORIAL_IMC, JSON.stringify(mediciones));
+        return true;
+    } catch (error) {
+        if (!(error instanceof DOMException)) {
+            throw error;
+        }
+
+        mostrarEstadoHistorial("No se pudo guardar el historial en este navegador.", true);
+        return false;
+    }
+}
+
+function crearElementoGrafico(nombre, atributos = {}, texto = "") {
+    const elemento = document.createElementNS("http://www.w3.org/2000/svg", nombre);
+
+    Object.entries(atributos).forEach(([atributo, valor]) => {
+        elemento.setAttribute(atributo, String(valor));
+    });
+
+    if (texto) {
+        elemento.textContent = texto;
+    }
+
+    return elemento;
+}
+
+function formatearFechaMedicion(fecha) {
+    if (fecha === null) {
+        return "Guardada";
+    }
+
+    return new Intl.DateTimeFormat("es", { day: "2-digit", month: "2-digit" }).format(new Date(fecha));
+}
+
+function renderizarGraficoHistorial(mediciones) {
+    graficoHistorial.replaceChildren();
+    borrarHistorialButton.classList.toggle("is-visible", mediciones.length > 0);
+    historialVacio.classList.toggle("is-hidden", mediciones.length > 0);
+    graficoHistorial.toggleAttribute("hidden", mediciones.length === 0);
+
+    if (mediciones.length === 0) {
+        resumenHistorial.textContent = "";
+        return;
+    }
+
+    const ancho = 640;
+    const alto = 280;
+    const margen = { arriba: 20, derecha: 20, abajo: 48, izquierda: 58 };
+    const anchoGrafico = ancho - margen.izquierda - margen.derecha;
+    const altoGrafico = alto - margen.arriba - margen.abajo;
+    const valoresIMC = mediciones.map((medicion) => calcularIMC(medicion.peso, medicion.altura));
+    const minimoIMC = Math.max(0, Math.floor((Math.min(...valoresIMC) - 2) / 5) * 5);
+    const maximoIMC = Math.ceil((Math.max(...valoresIMC) + 2) / 5) * 5;
+    const rangoIMC = maximoIMC - minimoIMC || 5;
+    const puntos = valoresIMC.map((imc, indice) => ({
+        x: mediciones.length === 1
+            ? margen.izquierda + anchoGrafico / 2
+            : margen.izquierda + (indice / (mediciones.length - 1)) * anchoGrafico,
+        y: margen.arriba + ((maximoIMC - imc) / rangoIMC) * altoGrafico,
+        imc,
+        medicion: mediciones[indice]
+    }));
+
+    for (let marca = 0; marca <= 4; marca += 1) {
+        const valor = maximoIMC - (rangoIMC * marca) / 4;
+        const y = margen.arriba + (altoGrafico * marca) / 4;
+
+        graficoHistorial.append(
+            crearElementoGrafico("line", {
+                x1: margen.izquierda,
+                y1: y,
+                x2: ancho - margen.derecha,
+                y2: y,
+                class: "chart-gridline"
+            }),
+            crearElementoGrafico("text", {
+                x: margen.izquierda - 10,
+                y: y + 4,
+                "text-anchor": "end",
+                class: "chart-axis-label"
+            }, valor.toFixed(0))
+        );
+    }
+
+    graficoHistorial.appendChild(crearElementoGrafico("polyline", {
+        points: puntos.map((punto) => `${punto.x},${punto.y}`).join(" "),
+        class: "chart-line"
+    }));
+
+    puntos.forEach((punto) => {
+        const circulo = crearElementoGrafico("circle", {
+            cx: punto.x,
+            cy: punto.y,
+            r: 6,
+            class: "chart-point"
+        });
+        circulo.appendChild(crearElementoGrafico(
+            "title",
+            {},
+            `IMC ${punto.imc.toFixed(1)} · ${formatearFechaMedicion(punto.medicion.fecha)}`
+        ));
+        graficoHistorial.appendChild(circulo);
+    });
+
+    const numeroMarcasFecha = Math.min(mediciones.length, 5);
+    for (let marca = 0; marca < numeroMarcasFecha; marca += 1) {
+        const indice = numeroMarcasFecha === 1
+            ? 0
+            : Math.round((marca / (numeroMarcasFecha - 1)) * (mediciones.length - 1));
+        const punto = puntos[indice];
+
+        graficoHistorial.appendChild(crearElementoGrafico("text", {
+            x: punto.x,
+            y: alto - 16,
+            "text-anchor": "middle",
+            class: "chart-axis-label"
+        }, formatearFechaMedicion(punto.medicion.fecha)));
+    }
+
+    const primerIMC = valoresIMC[0].toFixed(1);
+    const ultimoIMC = valoresIMC[valoresIMC.length - 1].toFixed(1);
+    resumenHistorial.textContent = mediciones.length === 1
+        ? `Una medición guardada. IMC: ${ultimoIMC}.`
+        : `${mediciones.length} mediciones guardadas. El IMC pasó de ${primerIMC} a ${ultimoIMC}.`;
+}
+
+function inicializarHistorialMediciones() {
+    const historial = leerHistorialMediciones();
+
+    if (historial === null) {
+        renderizarGraficoHistorial([]);
+        borrarHistorialButton.classList.add("is-visible");
+        return;
+    }
+
+    let mediciones = historial.mediciones;
+    if (!historial.existe && recordarMedidas.checked && medidasActualesValidas()) {
+        // Los datos antiguos no tienen fecha; se muestran como punto inicial sin inventar cuándo se midieron.
+        mediciones = [{
+            peso: Number(pesoInput.value),
+            altura: Number(alturaInput.value),
+            fecha: null
+        }];
+        guardarHistorialMediciones(mediciones);
+    }
+
+    renderizarGraficoHistorial(mediciones);
+}
+
+function registrarMedicionHistorial(peso, altura) {
+    const historial = leerHistorialMediciones();
+    if (historial === null) {
+        return;
+    }
+
+    const mediciones = [
+        ...historial.mediciones,
+        { peso, altura, fecha: new Date().toISOString() }
+    ];
+
+    if (guardarHistorialMediciones(mediciones)) {
+        renderizarGraficoHistorial(mediciones);
+        mostrarEstadoHistorial("Se ha añadido el cálculo al historial de este navegador.");
+    }
+}
+
+function borrarHistorialMediciones() {
+    // Guardar una lista vacía marca que el usuario borró el historial y evita reimportar el dato antiguo.
+    if (guardarHistorialMediciones([])) {
+        renderizarGraficoHistorial([]);
+        mostrarEstadoHistorial("Se ha borrado el historial de IMC de este navegador.");
     }
 }
 
@@ -301,6 +525,7 @@ if (menuToggle && navegacion) {
 if (formulario) {
     // La misma lógica se carga también en páginas sin formulario, por eso se inicializa de forma condicional.
     cargarMedidasGuardadas();
+    inicializarHistorialMediciones();
 
     recordarMedidas.addEventListener("change", () => {
         if (!recordarMedidas.checked) {
@@ -313,6 +538,7 @@ if (formulario) {
     });
 
     borrarMedidasButton.addEventListener("click", borrarMedidasGuardadas);
+    borrarHistorialButton.addEventListener("click", borrarHistorialMediciones);
 
     pesoInput.addEventListener("input", () => {
         if (formularioEnviado) {
@@ -342,6 +568,7 @@ if (formulario) {
 
         if (recordarMedidas.checked) {
             guardarMedidasGuardadas();
+            registrarMedicionHistorial(Number(pesoInput.value), Number(alturaInput.value));
         }
     });
 }

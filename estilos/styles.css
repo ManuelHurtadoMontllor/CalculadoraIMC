@@ -56,6 +56,15 @@
         .rango--sobrepeso { background-color: #fffbeb; color: #92400e; }
         .rango--obesidad { background-color: #fff1f2; color: #9f1239; }
 
+        .grafico-imc { display: block; width: 100%; height: auto; overflow: visible; }
+        .grafico-imc[hidden] { display: none; }
+        .chart-gridline { stroke: #e2e8f0; stroke-width: 1; }
+        .chart-axis-label { fill: #64748b; font-size: 11px; }
+        .chart-line { fill: none; stroke: #7965e8; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+        .chart-point { fill: #7965e8; stroke: #fff; stroke-width: 3; }
+        .history-empty { display: block; }
+        .history-empty.is-hidden { display: none; }
+
         .resultado-card { transition: background-color .35s ease, transform .35s ease; }
         .resultado-card.is-updated { animation: result-pop .45s ease; }
         .resultado__categoria { background-color: #fff; color: #64748b; }
@@ -162,6 +171,9 @@
 
         body.tema-oscuro .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
         body.tema-oscuro .placeholder\:text-slate-400::placeholder { color: #94a3b8; }
+        body.tema-oscuro .chart-gridline { stroke: #475569; }
+        body.tema-oscuro .chart-axis-label { fill: #cbd5e1; }
+        body.tema-oscuro .chart-point { stroke: #1f2937; }
         body.tema-oscuro .shadow-sm,
         body.tema-oscuro .shadow-lg { --tw-shadow-color: rgb(0 0 0 / 0.2); }
         body.tema-oscuro .hover\:text-violet-900:hover { color: #ddd6fe; }

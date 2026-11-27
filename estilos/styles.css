@@ -17,6 +17,11 @@
 
         .hero-enter { animation: rise-in .7s cubic-bezier(.2,.8,.2,1) both; }
         .card-enter { animation: rise-in .7s .12s cubic-bezier(.2,.8,.2,1) both; }
+        .indicador-respira { animation: respirar 3s ease-in-out infinite; }
+        @keyframes respirar {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(45, 212, 191, 0); transform: scale(1); }
+            50% { box-shadow: 0 0 0 5px rgba(45, 212, 191, .16); transform: scale(1.12); }
+        }
         @keyframes rise-in {
             from { opacity: 0; transform: translateY(18px); }
             to { opacity: 1; transform: translateY(0); }
@@ -83,7 +88,20 @@
         @keyframes result-pop {
             50% { transform: scale(1.015); }
         }
-        .gauge-marker { transition: left .65s cubic-bezier(.2,.8,.2,1); }
+        .gauge-segment { fill: none; stroke-width: 28; stroke-linecap: butt; }
+        .gauge-segment--bajo { stroke: #38bdf8; }
+        .gauge-segment--saludable { stroke: #34d399; }
+        .gauge-segment--sobrepeso { stroke: #fbbf24; }
+        .gauge-segment--obesidad { stroke: #fb7185; }
+        .gauge-label { fill: #64748b; font-size: 12px; font-weight: 600; }
+        .gauge-tick { fill: #94a3b8; font-size: 11px; }
+        .gauge-needle {
+            transform-box: view-box;
+            transform-origin: 50% 82.857%;
+            transition: transform .65s cubic-bezier(.2,.8,.2,1);
+        }
+        .gauge-needle line { stroke: #334155; stroke-linecap: round; stroke-width: 5; }
+        .gauge-hub { fill: #7965e8; stroke: #fff; stroke-width: 4; }
 
         @media (min-width: 640px) {
             .menu-toggle { display: none; }
@@ -174,6 +192,10 @@
         body.tema-oscuro .chart-gridline { stroke: #475569; }
         body.tema-oscuro .chart-axis-label { fill: #cbd5e1; }
         body.tema-oscuro .chart-point { stroke: #1f2937; }
+        body.tema-oscuro .gauge-label { fill: #cbd5e1; }
+        body.tema-oscuro .gauge-tick { fill: #94a3b8; }
+        body.tema-oscuro .gauge-needle line { stroke: #e2e8f0; }
+        body.tema-oscuro .gauge-hub { stroke: #1f2937; }
         body.tema-oscuro .shadow-sm,
         body.tema-oscuro .shadow-lg { --tw-shadow-color: rgb(0 0 0 / 0.2); }
         body.tema-oscuro .hover\:text-violet-900:hover { color: #ddd6fe; }

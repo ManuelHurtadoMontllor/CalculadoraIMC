@@ -15,7 +15,8 @@ const alturaError = document.getElementById("height-error");
 const tarjetaResultado = document.getElementById("result");
 const valorIMC = document.getElementById("bmi-value");
 const categoriaIMC = document.getElementById("bmi-category");
-const marcador = document.getElementById("gauge-marker");
+const agujaVelocimetro = document.getElementById("gauge-needle");
+const segmentosVelocimetro = document.getElementById("gauge-segments");
 const menuToggle = document.getElementById("menu-toggle");
 const navegacion = document.getElementById("primary-nav");
 const themeToggle = document.getElementById("theme-toggle");
@@ -169,13 +170,21 @@ function validarFormulario() {
     return pesoValido && alturaValida;
 }
 
-function actualizarResultado(imc, categoria) {
+function actualizarResultado(imc, categoria, animar = true) {
     valorIMC.textContent = imc.toFixed(1);
     categoriaIMC.textContent = categoria.nombre;
     tarjetaResultado.classList.remove("estado--inicial", ...estadosIMC);
     tarjetaResultado.classList.add(`estado--${categoria.id}`);
-    marcador.style.left = `${Math.max(3, Math.min(97, ((imc - 12) / 28) * 100))}%`;
+    const imcLimitado = Math.max(12, Math.min(40, imc));
+    const anguloAguja = ((imcLimitado - 12) / 28) * 180;
+    agujaVelocimetro.style.transform = `rotate(${anguloAguja}deg)`;
     tarjetaResultado.classList.remove("is-updated");
+    if (!animar) {
+        tarjetaResultado.setAttribute("aria-live", "off");
+        return;
+    }
+
+    tarjetaResultado.setAttribute("aria-live", "polite");
     // Forzar el recálculo permite volver a lanzar la animación en cálculos consecutivos.
     void tarjetaResultado.offsetWidth;
     tarjetaResultado.classList.add("is-updated");
@@ -203,6 +212,57 @@ function medidasActualesValidas() {
     return pesoInput.value.trim() !== "" && alturaInput.value.trim() !== "" &&
         Number.isFinite(peso) && peso >= 2 && peso <= 500 &&
         Number.isFinite(altura) && altura >= 50 && altura <= 300;
+}
+
+function actualizarResultadoEnVivo() {
+    if (!medidasActualesValidas()) {
+        return;
+    }
+
+    const imc = calcularIMC(Number(pesoInput.value), Number(alturaInput.value));
+    actualizarResultado(imc, obtenerCategoria(imc), false);
+}
+
+function dibujarVelocimetro() {
+    const centroX = 320;
+    const centroY = 232;
+    const radio = 184;
+    let inicioIMC = 12;
+
+    categoriasIMC.forEach((categoria) => {
+        const finIMC = Math.min(categoria.maximo, 40);
+        const anguloInicio = Math.PI - ((inicioIMC - 12) / 28) * Math.PI;
+        const anguloFin = Math.PI - ((finIMC - 12) / 28) * Math.PI;
+        const inicio = {
+            x: centroX + radio * Math.cos(anguloInicio),
+            y: centroY - radio * Math.sin(anguloInicio)
+        };
+        const fin = {
+            x: centroX + radio * Math.cos(anguloFin),
+            y: centroY - radio * Math.sin(anguloFin)
+        };
+        const arco = crearElementoGrafico("path", {
+            d: `M ${inicio.x} ${inicio.y} A ${radio} ${radio} 0 0 1 ${fin.x} ${fin.y}`,
+            class: `gauge-segment gauge-segment--${categoria.id}`
+        });
+
+        segmentosVelocimetro.appendChild(arco);
+
+        const etiqueta = categoria.id === "bajo"
+            ? "Bajo"
+            : categoria.id === "sobrepeso"
+                ? "Elevado"
+                : categoria.nombre;
+        const anguloMedio = (anguloInicio + anguloFin) / 2;
+        segmentosVelocimetro.appendChild(crearElementoGrafico("text", {
+            x: centroX + (radio - 37) * Math.cos(anguloMedio),
+            y: 272,
+            "text-anchor": "middle",
+            class: "gauge-label"
+        }, etiqueta));
+
+        inicioIMC = finIMC;
+    });
 }
 
 // La casilla es el consentimiento para conservar estas medidas localmente; no se envían a ningún servicio.
@@ -524,6 +584,7 @@ if (menuToggle && navegacion) {
 
 if (formulario) {
     // La misma lógica se carga también en páginas sin formulario, por eso se inicializa de forma condicional.
+    dibujarVelocimetro();
     cargarMedidasGuardadas();
     inicializarHistorialMediciones();
 
@@ -544,6 +605,7 @@ if (formulario) {
         if (formularioEnviado) {
             validarCampo(pesoInput, pesoError, 2, 500, "Introduce tu peso.", "El peso debe estar entre 2 y 500 kg.");
         }
+        actualizarResultadoEnVivo();
         guardarMedidasSiProcede();
     });
 
@@ -551,6 +613,7 @@ if (formulario) {
         if (formularioEnviado) {
             validarCampo(alturaInput, alturaError, 50, 300, "Introduce tu altura.", "La altura debe estar entre 50 y 300 cm.");
         }
+        actualizarResultadoEnVivo();
         guardarMedidasSiProcede();
     });
 

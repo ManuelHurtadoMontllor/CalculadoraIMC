@@ -46,7 +46,7 @@
         <main class="mx-auto grid w-full max-w-7xl items-start gap-8 px-6 pb-16 pt-8 sm:px-10 lg:grid-cols-2 lg:gap-10 lg:pb-24 lg:pt-14">
             <section class="hero-enter">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/75 px-3.5 py-2 text-xs font-semibold tracking-wide text-violet-700 shadow-sm">
-                    <span class="h-2 w-2 rounded-full bg-teal-400"></span>
+                    <span class="indicador-respira h-2 w-2 rounded-full bg-teal-400"></span>
                     UN PRIMER PASO PARA CUIDARTE
                 </div>
                 <h1 class="max-w-xl text-5xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-6xl">
@@ -137,14 +137,18 @@
                             </div>
                             <span id="bmi-category" class="resultado__categoria rounded-full px-3 py-1.5 text-xs font-semibold shadow-sm">Esperando tus datos</span>
                         </div>
-                        <div class="mt-6">
-                            <div class="relative h-2.5 rounded-full bg-gradient-to-r from-sky-400 via-emerald-400 via-50% to-rose-400">
-                                <span id="gauge-marker" class="gauge-marker absolute -top-1.5 left-0 h-5 w-5 -translate-x-1/2 rounded-full border-[3px] border-white bg-slate-800 shadow-md" style="left: 0%" aria-hidden="true"></span>
-                            </div>
-                            <div class="mt-2 flex justify-between text-[11px] font-medium text-slate-400">
-                                <span>Bajo</span><span>Saludable</span><span>Elevado</span>
-                            </div>
-                        </div>
+                        <svg class="grafico-imc mt-6" viewBox="0 0 640 280" role="img" aria-label="Velocímetro de las categorías del índice de masa corporal">
+                            <g id="gauge-segments"></g>
+                            <text class="gauge-tick" x="136" y="256" text-anchor="middle">12</text>
+                            <text class="gauge-tick" x="183" y="256" text-anchor="middle">18,5</text>
+                            <text class="gauge-tick" x="299" y="256" text-anchor="middle">25</text>
+                            <text class="gauge-tick" x="400" y="256" text-anchor="middle">30</text>
+                            <text class="gauge-tick" x="504" y="256" text-anchor="middle">40+</text>
+                            <g id="gauge-needle" class="gauge-needle" aria-hidden="true">
+                                <line x1="320" y1="232" x2="170" y2="232"></line>
+                            </g>
+                            <circle class="gauge-hub" cx="320" cy="232" r="11" aria-hidden="true"></circle>
+                        </svg>
                     </div>
                     <p class="mt-4 text-center text-xs leading-5 text-slate-400">
                         El IMC es una referencia orientativa y no sustituye el consejo de un profesional sanitario.
